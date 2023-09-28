@@ -1,10 +1,9 @@
 package be.intecbrussel.productapp.repository;
 
-import be.intecbrussel.productapp.model.Product;
+import be.intecbrussel.productapp.model.AppUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
-
+public interface UserRepository extends JpaRepository<AppUser, String> {
 }
