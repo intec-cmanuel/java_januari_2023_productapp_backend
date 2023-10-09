@@ -20,31 +20,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/")
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
     private final RegisterService registerService;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil, RegisterService registerService) {
-        this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
+    public AuthController(RegisterService registerService) {
         this.registerService = registerService;
     }
 
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody LoginRequest loginRequest) {
         try {
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-            String email = authentication.getName();
-            AppUser user = new AppUser(email, "");
-            String token = jwtUtil.createToken(user);
-            LoginResponse loginResponse = new LoginResponse(email, token);
-
-            return ResponseEntity.ok(loginResponse);
+           LoginResponse loginResponse = registerService.login(loginRequest);
+           return ResponseEntity.ok(loginResponse);
 
         } catch (BadCredentialsException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid username or password");
         } catch (Exception e){
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
