@@ -1,0 +1,4 @@
+[2023-10-11 13:08] : Attempting registration: Bobbers@gmail.com
+[2023-10-11 13:08] : Registration complete: email
+[2023-10-11 13:09] : Attempting registration: Tom@gmail.com
+[2023-10-11 13:09] : Registration complete: Tom@gmail.com

@@ -1,5 +1,6 @@
 package be.intecbrussel.productapp.aspect;
 
+import be.intecbrussel.productapp.logger.FileLogger;
 import be.intecbrussel.productapp.model.dto.LoginRequest;
 import be.intecbrussel.productapp.model.dto.LoginResponse;
 import org.aspectj.lang.JoinPoint;
@@ -9,17 +10,21 @@ import org.springframework.stereotype.Component;
 @Component
 @Aspect
 public class LoginAspect {
+    private final FileLogger fileLogger;
+
+    public LoginAspect(FileLogger fileLogger) {
+        this.fileLogger = fileLogger;
+    }
+
 
     @Before("execution(* be.intecbrussel.productapp.service.RegisterService.login(..))")
     public void beforeLoginAttempt(JoinPoint joinPoint) {
-        System.out.println("ATTEMPTING TO LOG IN");
-        System.out.println("EMAIL: " + ((LoginRequest) joinPoint.getArgs()[0]).getEmail());
-        System.out.println("PASSWORD: " + ((LoginRequest) joinPoint.getArgs()[0]).getPassword());
+        fileLogger.log("Attempting to log in: " + ((LoginRequest) joinPoint.getArgs()[0]).getEmail());
     }
 
-    @After("execution(* be.intecbrussel.productapp.service.*.*(..))")
+    @After("execution(* be.intecbrussel.productapp.service.RegisterService.login(..))")
     public void afterRegisterServiceMethods(JoinPoint joinPoint) {
-        System.out.println("Method " + joinPoint.getSignature().getName() + " has ended");
+        fileLogger.log("Log in attempt concluded: " + ((LoginRequest) joinPoint.getArgs()[0]).getEmail());
     }
 
     @AfterReturning(
@@ -27,8 +32,10 @@ public class LoginAspect {
             returning = "methodResult"
     )
     public void afterReturningLoginResponse(JoinPoint joinPoint, LoginResponse methodResult) {
-        System.out.println("Login Response: ");
-        System.out.println(methodResult);
+        if (methodResult != null)
+            fileLogger.log("Log in attempt successful: " + ((LoginRequest) joinPoint.getArgs()[0]).getEmail());
+        else
+            fileLogger.log("Log in attempt failed: No user found");
     }
 
     @AfterThrowing(
@@ -36,7 +43,8 @@ public class LoginAspect {
             throwing = "exception"
     )
     public void afterLoginThrowsException(JoinPoint joinPoint, Exception exception) {
-        System.out.println("Oopsy, something went wrong");
-        exception.printStackTrace();
+        fileLogger.log("Log in attempt failed: " + ((LoginRequest) joinPoint.getArgs()[0]).getEmail());
+        fileLogger.log("EXCEPTION: " + exception.getMessage());
+        fileLogger.logException(exception);
     }
 }
